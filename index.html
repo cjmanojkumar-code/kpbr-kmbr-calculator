@@ -19,12 +19,25 @@ button{border:0;border-radius:8px;padding:12px 18px;font-weight:700;font-size:15
 <div class="wrap">
 <header class="head">
 <h1>AMRITAKALPANA Building Consultants</h1>
-<p>KPBR / KMBR 2019 – Residential Setback Calculator</p>
+<p>KPBR / KMBR 2019 – Building Setback Calculator</p>
 </header>
 <main class="card">
 <div class="grid">
 <div><label for="rule">Rule set</label><select id="rule"><option>KPBR 2019 – Panchayat</option><option>KMBR 2019 – Municipality / Corporation</option></select></div>
-<div><label for="occ">Occupancy</label><select id="occ"><option>A1 – Residential</option></select></div>
+<div><label for="occ">Occupancy</label><select id="occ">
+<option value="A1">A1 – Residential</option>
+<option value="A2">A2 – Lodging Houses & Special Residential</option>
+<option value="B">B – Educational</option>
+<option value="C">C – Medical / Hospital</option>
+<option value="D">D – Assembly</option>
+<option value="E">E – Office / Business</option>
+<option value="F">F – Mercantile / Commercial</option>
+<option value="G1">G1 – Industrial I</option>
+<option value="G2">G2 – Industrial II</option>
+<option value="H">H – Storage</option>
+<option value="I">I – Hazardous</option>
+<option value="J">J – Multiplex Complex</option>
+</select></div>
 <div><label for="plot">Plot area (m²)</label><input id="plot" type="number" min="0" step=".01" value="300"></div>
 <div><label for="built">Total built-up area (m²)</label><input id="built" type="number" min="0" step=".01" value="180"></div>
 <div><label for="height">Building height (m)</label><input id="height" type="number" min="0" step=".1" value="8"></div>
@@ -75,29 +88,60 @@ const $=id=>document.getElementById(id);
 function num(id){const x=parseFloat($(id).value);return Number.isFinite(x)&&x>=0?x:0}
 function calc(){
  const plot=num("plot"),built=num("built"),h=num("height"),road=num("road");
+ const occ=$("occ").value;
  const single=$("single").value==="Yes", opening=$("opening").value==="Yes", consent=$("consent").value==="Yes";
  const small=plot<=125 && built<=200;
- let front=small?1.2:1.8, frontAvg=small?1.8:3.0, rear=small?.5:1, side=small?.6:1;
+ // Preliminary occupancy yard matrix based on KPBR Table 4 / 4A structure.
+ // Values are intended as a planning aid; exact current amendment conditions must be verified.
+ const matrix={
+   A1:{front:1.8,frontAvg:3,rear:1,rearAvg:1.5,side:1,sideAvg:null},
+   A2:{front:1.8,frontAvg:3,rear:1,rearAvg:1.5,side:1,sideAvg:null},
+   B:{front:3,frontAvg:5,rear:1.5,rearAvg:2,side:1.5,sideAvg:2},
+   C:{front:3,frontAvg:5,rear:1.5,rearAvg:2,side:1.5,sideAvg:2},
+   D:{front:4.5,frontAvg:6,rear:1.5,rearAvg:2,side:1.5,sideAvg:2},
+   E:{front:3,frontAvg:5,rear:1.5,rearAvg:2,side:1.5,sideAvg:2},
+   F:{front:4.5,frontAvg:6,rear:1.5,rearAvg:3,side:1.5,sideAvg:4},
+   G1:{front:3,frontAvg:3,rear:1.5,rearAvg:1.5,side:1,sideAvg:1},
+   G2:{front:3,frontAvg:3,rear:3,rearAvg:3,side:3,sideAvg:3},
+   H:{front:4.5,frontAvg:6,rear:1.5,rearAvg:3,side:1.5,sideAvg:2},
+   I:{front:6,frontAvg:7.5,rear:3,rearAvg:7.5,side:2,sideAvg:7.5},
+   J:{front:7.5,frontAvg:10.5,rear:5,rearAvg:5,side:5,sideAvg:5}
+ };
+ let base=matrix[occ]||matrix.A1;
+ let front=base.front, frontAvg=base.frontAvg, rear=base.rear, side=base.side;
  let notes=[];
- if(single && $("roadstatus").value==="Un-notified road" && road<6){
+ const occNames={A1:"A1 Residential",A2:"A2 Lodging Houses & Special Residential",B:"B Educational",C:"C Medical / Hospital",D:"D Assembly",E:"E Office / Business",F:"F Mercantile / Commercial",G1:"G1 Industrial I",G2:"G2 Industrial II",H:"H Storage",I:"I Hazardous",J:"J Multiplex Complex"};
+ notes.push("Occupancy selected: "+occNames[occ]+". Yard values are a preliminary application of the KPBR occupancy table; size-specific rows and current amendments must be checked for the actual project.");
+ if((occ==="A1"||occ==="F") && small){
+   front=Math.min(front,1.2); frontAvg=Math.min(frontAvg,1.8); rear=Math.min(rear,.5); side=Math.min(side,.6);
+   notes.push("Small-plot condition selected (plot ≤125 m² and built-up area ≤200 m²): the small-plot yard row is applied for A1/F in this preliminary calculator.");
+ }
+ if((occ==="A1"||occ==="A2") && built<=300){ notes.push("A1/A2 buildings up to 300 m² are treated under the corresponding A1/A2 general yard category in this preliminary calculation."); }
+ if(occ==="D" && built>800){ front=6; frontAvg=7.5; rear=3; side=4; notes.push("Assembly size exceeds 800 m²: the larger Group D yard category is applied provisionally."); }
+ if(occ==="F" && built<=200){ notes.push("Group F up to 200 m² follows the smaller commercial yard category; verify whether the use is reclassified under the current rules."); }
+ if(occ!=="A1") { $("single").value="No"; }
+
+ if(occ==="A1" && single && $("roadstatus").value==="Un-notified road" && road<6){
    front=Math.max(front,2); frontAvg=Math.max(frontAvg,2);
    notes.push("Single-family residence on an un-notified road narrower than 6 m: the calculator applies a 2.00 m front-yard minimum for the amendment condition selected.");
  }
  let rearApplied=rear, side1Applied=side, side2Applied=side;
  if(!opening){
-   if(built<=200 && h<=8 && consent){
+   if(occ==="A1" && built<=200 && h<=8 && consent){
      rearApplied=0; side1Applied=0;
      notes.push("Special qualifying case selected: built-up area ≤200 m², height ≤8 m, no opening and written consent. A non-front yard may be permitted to abut the boundary subject to the exact current rule conditions.");
-   }else{
+   }else if(occ==="A1" || occ==="F"){
      side1Applied=Math.min(side1Applied,.5);
-     notes.push("No opening selected: one non-front yard is treated as eligible for the 0.50 m conditional relaxation. The other side is retained at the base value.");
+     notes.push("No opening selected: one non-front yard is treated as eligible for the 0.50 m conditional relaxation for the selected A1/F planning case. The other side is retained at the base value.");
+   }else{
+     notes.push("No-opening side/rear relaxation was not applied to this occupancy in the preliminary calculator; verify the exact occupancy-specific provisos.");
    }
  }
  let heightAdj=0;
  if(h>10){heightAdj=Math.ceil((h-10)/3)*.5;front+=heightAdj;frontAvg+=heightAdj;rearApplied+=heightAdj;side1Applied+=heightAdj;side2Applied+=heightAdj;notes.push("Building height exceeds 10 m: 0.50 m per 3 m or fraction over 10 m is added in this preliminary calculation.");}
  if($("roadstatus").value==="NH / SH / District road") notes.push("Road-specific highway/PWD/building-line restrictions may require a greater front setback; verify the road record and applicable line.");
  if(built>plot){$("status").innerHTML='<div class="note">Check input: total built-up area is greater than plot area.</div>'}else{$("status").innerHTML='<div class="ok"><b>Calculation ready.</b> Verify the project-specific rule row and road restrictions before approval.</div>'}
- const vals=[["Front – minimum",front],["Front – average",frontAvg],["Rear – applied",rearApplied],["Side 1 – applied",side1Applied],["Side 2 – applied",side2Applied],["Base category",small?"Small plot":"General A1"],["Height adjustment",heightAdj],["Rule set",$("rule").value]];
+ const vals=[["Front – minimum",front],["Front – average",frontAvg],["Rear – applied",rearApplied],["Side 1 – applied",side1Applied],["Side 2 – applied",side2Applied],["Base category",small?"Small plot":"General "+occ],["Height adjustment",heightAdj],["Rule set",$("rule").value]];
  $("results").innerHTML=vals.map(v=>'<div class="metric"><span>'+v[0]+'</span><strong>'+((typeof v[1]==="number")?v[1].toFixed(2)+" m":v[1])+'</strong></div>').join("");
  $("notes").innerHTML="<ul>"+notes.map(n=>"<li>"+n+"</li>").join("")+"</ul>";
  far();
