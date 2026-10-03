@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AMRITAKALPANA KPBR / KMBR Setback Calculator</title>
+<style>
+:root{--blue:#174a73;--blue2:#eaf3f9;--ink:#173042;--muted:#647482;--line:#d7e0e7;--bg:#f6f8fa;--ok:#e8f5e9;--warn:#fff5d8}
+*{box-sizing:border-box}body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--ink)}
+.wrap{max-width:920px;margin:0 auto;padding:18px}.head{background:var(--blue);color:#fff;padding:22px;border-radius:14px 14px 0 0}.head h1{margin:0;font-size:25px}.head p{margin:7px 0 0;opacity:.9}.card{background:#fff;border:1px solid var(--line);padding:18px;border-radius:0 0 14px 14px}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}@media(max-width:680px){.grid{grid-template-columns:1fr}.head h1{font-size:21px}}
+label{display:block;font-weight:700;font-size:14px;margin-bottom:6px}input,select{width:100%;padding:11px;border:1px solid #bfcbd4;border-radius:8px;font-size:16px;background:#fff;color:var(--ink)}
+button{border:0;border-radius:8px;padding:12px 18px;font-weight:700;font-size:15px;cursor:pointer;background:var(--blue);color:#fff;margin-top:16px}.secondary{background:#eef3f6;color:var(--ink);margin-left:8px}
+.section{margin-top:18px;border-top:1px solid var(--line);padding-top:16px}.section h2{font-size:18px;margin:0 0 12px}.results{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}@media(max-width:680px){.results{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.metric{border:1px solid var(--line);border-radius:9px;padding:12px;background:#fbfcfd}.metric span{font-size:12px;color:var(--muted)}.metric strong{display:block;font-size:22px;margin-top:4px}.note{padding:12px;background:var(--warn);border-left:4px solid #d8a400;border-radius:6px;font-size:13px;line-height:1.45}.ok{background:var(--ok);border-left:4px solid #4b8f4b;padding:12px;border-radius:6px}.small{font-size:12px;color:var(--muted);line-height:1.5}.footer{margin-top:18px;text-align:center;color:var(--muted);font-size:12px}
+@media print{body{background:#fff}.wrap{max-width:none}.head{color:#000;background:#fff;border:1px solid #bbb}.card{border:0;padding:10px}button{display:none}.section{break-inside:avoid}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="head">
+<h1>AMRITAKALPANA Building Consultants</h1>
+<p>KPBR / KMBR 2019 – Residential Setback Calculator</p>
+</header>
+<main class="card">
+<div class="grid">
+<div><label for="rule">Rule set</label><select id="rule"><option>KPBR 2019 – Panchayat</option><option>KMBR 2019 – Municipality / Corporation</option></select></div>
+<div><label for="occ">Occupancy</label><select id="occ"><option>A1 – Residential</option></select></div>
+<div><label for="plot">Plot area (m²)</label><input id="plot" type="number" min="0" step=".01" value="300"></div>
+<div><label for="built">Total built-up area (m²)</label><input id="built" type="number" min="0" step=".01" value="180"></div>
+<div><label for="height">Building height (m)</label><input id="height" type="number" min="0" step=".1" value="8"></div>
+<div><label for="road">Abutting road width (m)</label><input id="road" type="number" min="0" step=".1" value="6"></div>
+<div><label for="roadstatus">Road status</label><select id="roadstatus"><option>Un-notified road</option><option>Notified / other regulated road</option><option>NH / SH / District road</option></select></div>
+<div><label for="single">Single-family residence?</label><select id="single"><option>Yes</option><option>No</option></select></div>
+<div><label for="opening">Opening on proposed reduced side/rear yard?</label><select id="opening"><option>No</option><option>Yes</option></select></div>
+<div><label for="consent">Adjoining-owner written consent available?</label><select id="consent"><option>No</option><option>Yes</option></select></div>
+</div>
+
+<button id="calculate">Calculate Setbacks</button>
+<button id="print" class="secondary" type="button">Print Result</button>
+
+<section class="section">
+<h2>Calculated setback values</h2>
+<div id="status"></div>
+<div class="results" id="results"></div>
+</section>
+
+<section class="section">
+<h2>Rule conditions applied</h2>
+<div id="notes" class="small"></div>
+</section>
+
+<section class="section">
+<h2>Coverage / FAR quick check</h2>
+<div class="grid">
+<div><label for="footprint">Proposed ground footprint (m²)</label><input id="footprint" type="number" min="0" step=".01" value="0"></div>
+<div><label for="permcov">Applicable permitted coverage (%)</label><input id="permcov" type="number" min="0" step=".01" value="0"></div>
+<div><label for="permfar">Applicable permitted FAR / FSI</label><input id="permfar" type="number" min="0" step=".01" value="0"></div>
+<div class="metric"><span>Calculated coverage / FAR</span><strong id="farout">—</strong></div>
+</div>
+</section>
+
+<section class="section">
+<div class="note"><b>Important:</b> This is a preliminary planning calculator, not a statutory approval tool. Final compliance must be checked against the current KPBR/KMBR provisions, applicable amendments, road/building-line restrictions, local-body requirements and K-SMART/e-DCR scrutiny.</div>
+</section>
+
+<div class="footer">
+AMRITAKALPANA Building Consultants • Architecture & Planning • BIM • AutoCAD Drafting • 3D Modelling & Rendering<br>
+Chempakasseri, Kumarakom P.O., Kottayam – 686563 • www.amritakalpana.in
+</div>
+</main>
+</div>
+<script>
+(function(){
+const $=id=>document.getElementById(id);
+function num(id){const x=parseFloat($(id).value);return Number.isFinite(x)&&x>=0?x:0}
+function calc(){
+ const plot=num("plot"),built=num("built"),h=num("height"),road=num("road");
+ const single=$("single").value==="Yes", opening=$("opening").value==="Yes", consent=$("consent").value==="Yes";
+ const small=plot<=125 && built<=200;
+ let front=small?1.2:1.8, frontAvg=small?1.8:3.0, rear=small?.5:1, side=small?.6:1;
+ let notes=[];
+ if(single && $("roadstatus").value==="Un-notified road" && road<6){
+   front=Math.max(front,2); frontAvg=Math.max(frontAvg,2);
+   notes.push("Single-family residence on an un-notified road narrower than 6 m: the calculator applies a 2.00 m front-yard minimum for the amendment condition selected.");
+ }
+ let rearApplied=rear, side1Applied=side, side2Applied=side;
+ if(!opening){
+   if(built<=200 && h<=8 && consent){
+     rearApplied=0; side1Applied=0;
+     notes.push("Special qualifying case selected: built-up area ≤200 m², height ≤8 m, no opening and written consent. A non-front yard may be permitted to abut the boundary subject to the exact current rule conditions.");
+   }else{
+     side1Applied=Math.min(side1Applied,.5);
+     notes.push("No opening selected: one non-front yard is treated as eligible for the 0.50 m conditional relaxation. The other side is retained at the base value.");
+   }
+ }
+ let heightAdj=0;
+ if(h>10){heightAdj=Math.ceil((h-10)/3)*.5;front+=heightAdj;frontAvg+=heightAdj;rearApplied+=heightAdj;side1Applied+=heightAdj;side2Applied+=heightAdj;notes.push("Building height exceeds 10 m: 0.50 m per 3 m or fraction over 10 m is added in this preliminary calculation.");}
+ if($("roadstatus").value==="NH / SH / District road") notes.push("Road-specific highway/PWD/building-line restrictions may require a greater front setback; verify the road record and applicable line.");
+ if(built>plot){$("status").innerHTML='<div class="note">Check input: total built-up area is greater than plot area.</div>'}else{$("status").innerHTML='<div class="ok"><b>Calculation ready.</b> Verify the project-specific rule row and road restrictions before approval.</div>'}
+ const vals=[["Front – minimum",front],["Front – average",frontAvg],["Rear – applied",rearApplied],["Side 1 – applied",side1Applied],["Side 2 – applied",side2Applied],["Base category",small?"Small plot":"General A1"],["Height adjustment",heightAdj],["Rule set",$("rule").value]];
+ $("results").innerHTML=vals.map(v=>'<div class="metric"><span>'+v[0]+'</span><strong>'+((typeof v[1]==="number")?v[1].toFixed(2)+" m":v[1])+'</strong></div>').join("");
+ $("notes").innerHTML="<ul>"+notes.map(n=>"<li>"+n+"</li>").join("")+"</ul>";
+ far();
+}
+function far(){
+ const p=num("plot"),fp=num("footprint"),b=num("built"),pc=num("permcov"),pf=num("permfar");
+ const cov=p?fp/p*100:0, f=p?b/p:0;
+ $("farout").textContent=(pc>0?cov.toFixed(2)+"% / "+(cov<=pc?"Coverage OK":"Coverage CHECK")+" • ":"")+ (pf>0?f.toFixed(2)+" / "+(f<=pf?"FAR OK":"FAR CHECK"):"Enter permitted values");
+}
+$("calculate").addEventListener("click",calc);$("print").addEventListener("click",()=>window.print());
+["footprint","permcov","permfar"].forEach(id=>$(id).addEventListener("input",far));
+calc();
+})();
+</script>
+</body>
+</html>
