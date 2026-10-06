@@ -49,15 +49,25 @@ table{width:100%;border-collapse:collapse;margin-top:8px}th,td{border-bottom:1px
 <label>Plot area (m²)</label><input id="plot" type="number" min="0" step=".01">
 <label>Access width provided (m)</label><input id="access" type="number" min="0" step=".01">
 <label>Building height (m)</label><input id="height" type="number" min="0" step=".01">
-<label>Total covered area (m²)</label><input id="covered" type="number" min="0" step=".01">
+<label>Building Footprint (m²)</label><input id="covered" type="number" min="0" step=".01">
 <label>Total Floor Area / FSI area (m²)</label><input id="tfa" type="number" min="0" step=".01">
 <label>Room height provided (m)</label><input id="roomHeight" type="number" min="0" step=".01">
 <label>Exit width provided (m)</label><input id="exitWidth" type="number" min="0" step=".01">
 <label>Maximum travel distance provided (m)</label><input id="travel" type="number" min="0" step=".01">
 </section>
 
+<section class="card full">
+<h2>3. Floor-wise area & total built-up area</h2>
+<div class="row">
+<div><label>Number of floors</label><select id="floorCount"><option value="1" selected>1 floor</option><option value="2">2 floors</option><option value="3">3 floors</option><option value="4">4 floors</option><option value="5">5 floors</option><option value="6">6 floors</option><option value="7">7 floors</option><option value="8">8 floors</option><option value="9">9 floors</option><option value="10">10 floors</option></select></div>
+<div><label>Total built-up area (m²) — automatic</label><input id="builtupTotal" type="number" step=".01" readonly></div>
+</div>
+<table><thead><tr><th>Floor</th><th>Floor area (m²)</th></tr></thead><tbody id="floorRows"></tbody></table>
+<div class="note">Enter the actual floor-wise built-up area. The calculator automatically totals these areas. <b>Building Footprint</b> is entered separately and is used for the coverage calculation. Do not assume the Ground Floor area equals the Building Footprint, especially where projections, cantilevers or other upper-floor elements affect the applicable footprint. Total built-up area and Total Floor Area / FSI area may differ where applicable; enter the applicable FSI area separately.</div>
+</section>
+
 <section class="card">
-<h2>3. Yard dimensions</h2>
+<h2>4. Yard dimensions</h2>
 <div class="row"><div><label>Front minimum (m)</label><input id="frontmin" type="number" min="0" step=".01"></div><div><label>Front mean (m)</label><input id="frontmean" type="number" min="0" step=".01"></div></div>
 <div class="row"><div><label>Rear minimum (m)</label><input id="rearmin" type="number" min="0" step=".01"></div><div><label>Rear mean (m)</label><input id="rearmean" type="number" min="0" step=".01"></div></div>
 <div class="row"><div><label>Side 1 minimum (m)</label><input id="s1min" type="number" min="0" step=".01"></div><div><label>Side 1 mean (m)</label><input id="s1mean" type="number" min="0" step=".01"></div></div>
@@ -65,7 +75,7 @@ table{width:100%;border-collapse:collapse;margin-top:8px}th,td{border-bottom:1px
 </section>
 
 <section class="card">
-<h2>4. Road & boundary checks</h2>
+<h2>5. Road & boundary checks</h2>
 <label>Road type</label><select id="roadType"><option value="notified">Notified road</option><option value="unnotified">Un-notified road</option><option value="lane">Lane road</option></select>
 <label>Building to road distance (m)</label><input id="roadDist" type="number" min="0" step=".01">
 <label>Shortest building footprint to plot boundary (m)</label><input id="shortest" type="number" min="0" step=".01">
@@ -73,7 +83,7 @@ table{width:100%;border-collapse:collapse;margin-top:8px}th,td{border-bottom:1px
 </section>
 
 <section class="card">
-<h2>5. Environmental / services</h2>
+<h2>6. Environmental / services</h2>
 <label>Unpaved/percolation area provided (m²)</label><input id="unpaved" type="number" min="0" step=".01">
 <label>Ground-water recharge system</label><select id="rwh"><option value="yes">Defined / provided</option><option value="no">Not provided</option></select>
 <label>Light & ventilation</label><select id="vent"><option value="yes">Adequate</option><option value="no">Needs review</option></select>
@@ -81,7 +91,7 @@ table{width:100%;border-collapse:collapse;margin-top:8px}th,td{border-bottom:1px
 </section>
 
 <section class="card">
-<h2>6. Septic / waste distances</h2>
+<h2>7. Septic / waste distances</h2>
 <label>Septic tank to existing well (m)</label><input id="septicWell" type="number" min="0" step=".01">
 <label>Septic tank to plot boundary (m)</label><input id="septicPlot" type="number" min="0" step=".01">
 <label>Waste disposal to existing well (m)</label><input id="wasteWell" type="number" min="0" step=".01">
@@ -90,7 +100,7 @@ table{width:100%;border-collapse:collapse;margin-top:8px}th,td{border-bottom:1px
 </section>
 
 <section class="card full">
-<h2>7. Automatically loaded rule requirements</h2>
+<h2>8. Automatically loaded rule requirements</h2>
 <div class="metricgrid">
 <div class="metric"><small>Permissible coverage</small><strong id="covReq">—</strong></div>
 <div class="metric"><small>Basic FSI / scrutiny limit</small><strong id="fsiReq">—</strong></div>
@@ -105,7 +115,7 @@ table{width:100%;border-collapse:collapse;margin-top:8px}th,td{border-bottom:1px
 </section>
 
 <section class="card full">
-<h2>8. Benchmark projects from your scrutiny reports</h2>
+<h2>9. Benchmark projects from your scrutiny reports</h2>
 <select id="benchmark">
 <option value="">Select a benchmark...</option>
 <option value="mun345">Municipality — 345 m² plot</option>
@@ -123,7 +133,7 @@ table{width:100%;border-collapse:collapse;margin-top:8px}th,td{border-bottom:1px
 </section>
 
 <section class="card full">
-<h2>9. Result</h2>
+<h2>10. Result</h2>
 <div class="metricgrid" id="summary"></div>
 <table><thead><tr><th>Check</th><th>Rule basis</th><th>Required</th><th>Provided</th><th>Status</th></tr></thead><tbody id="report"></tbody></table>
 <div id="overall" class="rule">Enter values and run the pre-scrutiny.</div>
@@ -171,6 +181,28 @@ $('profile').addEventListener('change',loadProfile);$('occ').addEventListener('c
 
 $('profile').addEventListener('change',loadProfile);loadProfile();
 
+function renderFloors(prefill){
+ const count=parseInt($('floorCount').value||1,10);
+ const body=$('floorRows');
+ body.innerHTML='';
+ for(let i=0;i<count;i++){
+   const labels=['Ground Floor','First Floor','Second Floor','Third Floor','Fourth Floor','Fifth Floor','Sixth Floor','Seventh Floor','Eighth Floor','Ninth Floor'];
+   const tr=document.createElement('tr');
+   const val=prefill&&prefill[i]!=null?prefill[i]:'';
+   tr.innerHTML=`<td>${labels[i]}</td><td><input class="floorArea" data-floor="${i}" type="number" min="0" step=".01" value="${val}"></td>`;
+   body.appendChild(tr);
+ }
+ body.querySelectorAll('.floorArea').forEach(el=>el.addEventListener('input',updateFloorTotals));
+ updateFloorTotals();
+}
+function updateFloorTotals(){
+ const areas=[...document.querySelectorAll('.floorArea')].map(el=>Math.max(0,parseFloat(el.value)||0));
+ const total=areas.reduce((a,b)=>a+b,0);
+ $('builtupTotal').value=total.toFixed(2);
+}
+$('floorCount').addEventListener('change',()=>renderFloors());
+renderFloors();
+
 const benchmarks={
 mun345:{profile:'mun',plot:345,access:3.6,height:6.97,covered:129.66,tfa:232.95,front:[6.84,9.77],rear:[2.78,4.05],side1:[1.5,2.87],side2:[1.1,2.54],roadType:'unnotified',roadDist:6.84,shortest:1.10,unpaved:107.67,rwh:'yes',vent:'yes',security:'no',septicWell:7.73,septicPlot:3.37,wasteWell:8.76,wastePlot:3.27,wasteSeg:'yes'},
 mun403:{profile:'mun',plot:403,access:0,height:7.20,covered:112.29,tfa:133.41,front:[7.68,8.53],rear:[2.33,6],side1:[1.12,2.14],side2:[1.1,1.35],roadType:'notified',roadDist:7.04,shortest:1.09,unpaved:145.36,rwh:'yes',vent:'yes',security:'no',septicWell:17.54,septicPlot:1.13,wasteWell:9.22,wastePlot:1.26,wasteSeg:'yes'},
@@ -181,7 +213,7 @@ p2F_962:{profile:'p2',occ:'F',plot:962,access:8,height:4.95,covered:57.70,tfa:49
 function set(id,v){$(id).value=v}
 $('loadBenchmark').addEventListener('click',()=>{
  const b=benchmarks[$('benchmark').value];if(!b)return;
- set('profile',b.profile);set('occ',b.occ||'A1');loadProfile();set('plot',b.plot);set('access',b.access);set('height',b.height);set('covered',b.covered);set('tfa',b.tfa);
+ set('profile',b.profile);set('occ',b.occ||'A1');loadProfile();set('plot',b.plot);set('access',b.access);set('height',b.height);set('covered',b.covered);set('tfa',b.tfa);set('floorCount',1);renderFloors([b.covered]);
  set('roomHeight',b.roomHeight||'');set('exitWidth',b.exitWidth||'');set('travel',b.travel||'');set('frontmin',b.front[0]);set('frontmean',b.front[1]);set('rearmin',b.rear[0]);set('rearmean',b.rear[1]);set('s1min',b.side1[0]);set('s1mean',b.side1[1]);set('s2min',b.side2[0]);set('s2mean',b.side2[1]);
  set('roadType',b.roadType);set('roadDist',b.roadDist);set('shortest',b.shortest);set('shade','yes');set('unpaved',b.unpaved);set('rwh',b.rwh);set('vent',b.vent);set('security',b.security);
  set('septicWell',b.septicWell);set('septicPlot',b.septicPlot);set('wasteWell',b.wasteWell);set('wastePlot',b.wastePlot);set('wasteSeg',b.wasteSeg);
@@ -217,7 +249,8 @@ $('check').addEventListener('click',()=>{
  $('report').innerHTML=rows.join('');
  const hard=[cov<=d.coverage,fsi<=d.fsi,n('frontmin')>=d.front[0]&&n('frontmean')>=d.front[1],n('rearmin')>=d.rear[0]&&n('rearmean')>=d.rear[1],n('s1min')>=d.side[0]&&n('s1mean')>=d.side[1],n('s2min')>=d.side[0]&&n('s2mean')>=d.side[1],n('roadDist')>=roadReq,n('shortest')>=1,$('shade').value==='yes',n('unpaved')>=unpReq,$('vent').value==='yes',$('rwh').value==='yes',$('wasteSeg').value==='yes'];
  const pass=hard.every(Boolean);
- $('summary').innerHTML=`<div class="metric"><small>Profile</small><strong>${p.name}</strong></div><div class="metric"><small>Coverage</small><strong>${f(cov)}%</strong></div><div class="metric"><small>FSI</small><strong>${f(fsi)}</strong></div><div class="metric"><small>Unpaved required</small><strong>${f(unpReq)} m²</strong></div>`;
+ const builtup=parseFloat($('builtupTotal').value)||0;
+ $('summary').innerHTML=`<div class="metric"><small>Profile</small><strong>${p.name}</strong></div><div class="metric"><small>Building Footprint</small><strong>${f(covered)} m²</strong></div><div class="metric"><small>Total built-up area</small><strong>${f(builtup)} m²</strong></div><div class="metric"><small>FSI</small><strong>${f(fsi)}</strong></div><div class="metric"><small>Unpaved required</small><strong>${f(unpReq)} m²</strong></div>`;
  $('overall').innerHTML=pass?'<b class="ok">PRE-SCRUTINY PASS</b> — Automatically evaluated checks pass. Items marked VERIFY are informational/project-specific and still require confirmation.':'<b class="bad">CHECK REQUIRED</b> — One or more automatically evaluated checks failed. Review the red rows before submission.';
  $('report').scrollIntoView({behavior:'smooth',block:'start'});
  } catch(err) {
