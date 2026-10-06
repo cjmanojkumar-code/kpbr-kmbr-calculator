@@ -10,7 +10,7 @@
 h1{margin:0 0 6px;font-size:25px}.hero p{margin:0;opacity:.9;font-size:13px}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}.card{background:#fff;border:1px solid #d7e0e7;border-radius:12px;padding:16px}.full{grid-column:1/-1}
 h2{font-size:17px;margin:0 0 12px}label{display:block;font-size:12px;font-weight:700;margin:9px 0 5px}
-input,select{width:100%;padding:10px;border:1px solid #b9c5ce;border-radius:7px;font-size:14px;background:#fff}
+input,select{width:100%;padding:10px;border:1px solid #b9c5ce;border-radius:7px;font-size:14px;background:#fff;color:#17212b !important;-webkit-text-fill-color:#17212b;color-scheme:light;forced-color-adjust:none}.floorCountSelect{font-size:16px;font-weight:700;min-height:44px;color:#17212b !important;background-color:#fff !important;-webkit-text-fill-color:#17212b; color-scheme:light; forced-color-adjust:none}select option{color:#17212b !important;background-color:#fff !important;-webkit-text-fill-color:#17212b}.floorCountSelect option{color:#17212b !important;background-color:#fff !important;-webkit-text-fill-color:#17212b}.floorRowDisabled{opacity:.45;background:#f6f7f8}
 .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.three{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
 button{padding:11px 16px;border:0;border-radius:8px;font-weight:700;cursor:pointer;background:#1769aa;color:white;margin-right:8px;margin-top:10px}.gray{background:#697680}
 .metricgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}.metric{border:1px solid #d8e0e6;border-radius:9px;padding:11px;background:#fafcfd}.metric small{color:#5b6871}.metric strong{display:block;font-size:19px;margin-top:4px}
@@ -50,20 +50,20 @@ table{width:100%;border-collapse:collapse;margin-top:8px}th,td{border-bottom:1px
 <label>Access width provided (m)</label><input id="access" type="number" min="0" step=".01">
 <label>Building height (m)</label><input id="height" type="number" min="0" step=".01">
 <label>Building Footprint (m²)</label><input id="covered" type="number" min="0" step=".01">
-<label>Total Floor Area / FSI area (m²)</label><input id="tfa" type="number" min="0" step=".01">
+<label>Total Floor Area / FSI area (m²) — automatic</label><input id="tfa" type="number" min="0" step=".01" readonly>
 <label>Room height provided (m)</label><input id="roomHeight" type="number" min="0" step=".01">
 <label>Exit width provided (m)</label><input id="exitWidth" type="number" min="0" step=".01">
 <label>Maximum travel distance provided (m)</label><input id="travel" type="number" min="0" step=".01">
 </section>
 
 <section class="card full">
-<h2>3. Floor-wise area & total built-up area</h2>
+<h2>3. Floor-wise built-up area & floor area</h2>
 <div class="row">
-<div><label>Number of floors</label><select id="floorCount"><option value="1" selected>1 floor</option><option value="2">2 floors</option><option value="3">3 floors</option><option value="4">4 floors</option><option value="5">5 floors</option><option value="6">6 floors</option><option value="7">7 floors</option><option value="8">8 floors</option><option value="9">9 floors</option><option value="10">10 floors</option></select></div>
+<div><label>Number of floors</label><select id="floorCount" class="floorCountSelect"><option value="1" selected>1 floor — Ground Floor</option><option value="2">2 floors — Ground + 1</option><option value="3">3 floors — Ground + 2</option><option value="4">4 floors — Ground + 3</option><option value="5">5 floors — Ground + 4</option><option value="6">6 floors — Ground + 5</option><option value="7">7 floors — Ground + 6</option><option value="8">8 floors — Ground + 7</option><option value="9">9 floors — Ground + 8</option><option value="10">10 floors — Ground + 9</option></select></div>
 <div><label>Total built-up area (m²) — automatic</label><input id="builtupTotal" type="number" step=".01" readonly></div>
 </div>
-<table><thead><tr><th>Floor</th><th>Floor area (m²)</th></tr></thead><tbody id="floorRows"></tbody></table>
-<div class="note">Enter the actual floor-wise built-up area. The calculator automatically totals these areas. <b>Building Footprint</b> is entered separately and is used for the coverage calculation. Do not assume the Ground Floor area equals the Building Footprint, especially where projections, cantilevers or other upper-floor elements affect the applicable footprint. Total built-up area and Total Floor Area / FSI area may differ where applicable; enter the applicable FSI area separately.</div>
+<table><thead><tr><th>Floor</th><th>Built-up area (m²)</th><th>Floor area / FSI area (m²)</th></tr></thead><tbody id="floorRows"></tbody></table>
+<div class="note">Enter the <b>built-up area</b> and <b>floor area / FSI area</b> separately for each floor. Total built-up area and Total Floor Area / FSI area are calculated automatically. The <b>sum of floor area / FSI area</b> is used for the FSI calculation. <b>Building Footprint</b> remains a separate input and is used only for the coverage calculation.</div>
 </section>
 
 <section class="card">
@@ -185,20 +185,24 @@ function renderFloors(prefill){
  const count=parseInt($('floorCount').value||1,10);
  const body=$('floorRows');
  body.innerHTML='';
+ const labels=['Ground Floor','First Floor','Second Floor','Third Floor','Fourth Floor','Fifth Floor','Sixth Floor','Seventh Floor','Eighth Floor','Ninth Floor'];
  for(let i=0;i<count;i++){
-   const labels=['Ground Floor','First Floor','Second Floor','Third Floor','Fourth Floor','Fifth Floor','Sixth Floor','Seventh Floor','Eighth Floor','Ninth Floor'];
    const tr=document.createElement('tr');
-   const val=prefill&&prefill[i]!=null?prefill[i]:'';
-   tr.innerHTML=`<td>${labels[i]}</td><td><input class="floorArea" data-floor="${i}" type="number" min="0" step=".01" value="${val}"></td>`;
+   const bu=prefill&&prefill[i]&&prefill[i].bu!=null?prefill[i].bu:'';
+   const fa=prefill&&prefill[i]&&prefill[i].fa!=null?prefill[i].fa:'';
+   tr.innerHTML=`<td><b>${labels[i]}</b></td><td><input class="floorBuiltup" data-floor="${i}" type="number" min="0" step=".01" value="${bu}"></td><td><input class="floorArea" data-floor="${i}" type="number" min="0" step=".01" value="${fa}"></td>`;
    body.appendChild(tr);
  }
- body.querySelectorAll('.floorArea').forEach(el=>el.addEventListener('input',updateFloorTotals));
+ body.querySelectorAll('.floorBuiltup,.floorArea').forEach(el=>el.addEventListener('input',updateFloorTotals));
  updateFloorTotals();
 }
 function updateFloorTotals(){
- const areas=[...document.querySelectorAll('.floorArea')].map(el=>Math.max(0,parseFloat(el.value)||0));
- const total=areas.reduce((a,b)=>a+b,0);
- $('builtupTotal').value=total.toFixed(2);
+ const builtups=[...document.querySelectorAll('.floorBuiltup')].map(el=>Math.max(0,parseFloat(el.value)||0));
+ const floorAreas=[...document.querySelectorAll('.floorArea')].map(el=>Math.max(0,parseFloat(el.value)||0));
+ const builtupTotal=builtups.reduce((a,b)=>a+b,0);
+ const floorTotal=floorAreas.reduce((a,b)=>a+b,0);
+ $('builtupTotal').value=builtupTotal.toFixed(2);
+ $('tfa').value=floorTotal.toFixed(2);
 }
 $('floorCount').addEventListener('change',()=>renderFloors());
 renderFloors();
@@ -213,7 +217,7 @@ p2F_962:{profile:'p2',occ:'F',plot:962,access:8,height:4.95,covered:57.70,tfa:49
 function set(id,v){$(id).value=v}
 $('loadBenchmark').addEventListener('click',()=>{
  const b=benchmarks[$('benchmark').value];if(!b)return;
- set('profile',b.profile);set('occ',b.occ||'A1');loadProfile();set('plot',b.plot);set('access',b.access);set('height',b.height);set('covered',b.covered);set('tfa',b.tfa);set('floorCount',1);renderFloors([b.covered]);
+ set('profile',b.profile);set('occ',b.occ||'A1');loadProfile();set('plot',b.plot);set('access',b.access);set('height',b.height);set('covered',b.covered);set('floorCount',1);renderFloors([{bu:b.covered,fa:b.tfa}]);
  set('roomHeight',b.roomHeight||'');set('exitWidth',b.exitWidth||'');set('travel',b.travel||'');set('frontmin',b.front[0]);set('frontmean',b.front[1]);set('rearmin',b.rear[0]);set('rearmean',b.rear[1]);set('s1min',b.side1[0]);set('s1mean',b.side1[1]);set('s2min',b.side2[0]);set('s2mean',b.side2[1]);
  set('roadType',b.roadType);set('roadDist',b.roadDist);set('shortest',b.shortest);set('shade','yes');set('unpaved',b.unpaved);set('rwh',b.rwh);set('vent',b.vent);set('security',b.security);
  set('septicWell',b.septicWell);set('septicPlot',b.septicPlot);set('wasteWell',b.wasteWell);set('wastePlot',b.wastePlot);set('wasteSeg',b.wasteSeg);
