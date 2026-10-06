@@ -189,18 +189,19 @@ $('loadBenchmark').addEventListener('click',()=>{
 $('reset').addEventListener('click',()=>location.reload());
 function row(name,rule,req,prov,ok,verify=false){let cls=verify?'verifyrow':ok?'passrow':'failrow';let st=verify?'<span class="warn">VERIFY</span>':ok?'<span class="ok">ACCEPTED</span>':'<span class="bad">CHECK</span>';return `<tr class="${cls}"><td>${name}</td><td>${rule}</td><td>${req}</td><td>${prov}</td><td>${st}</td></tr>`}
 $('check').addEventListener('click',()=>{
+ try {
  const p=profiles[$('profile').value],o=$('occ').value,d=p[o],plot=n('plot'),covered=n('covered'),tfa=n('tfa');if(!d){$('overall').innerHTML='<b class="warn">Commercial rule profile not yet source-verified for this local body. Use the Category II commercial profile or supply an accepted Municipality/Category I commercial scrutiny report.</b>';return} if(plot<=0){$('overall').innerHTML='<b class="bad">Enter a valid plot area.</b>';return}
  const cov=covered/plot*100,fsi=tfa/plot,unpReq=(plot-covered)*.5;
  let roadReq=$('roadType').value==='notified'?3:$('roadType').value==='lane'?1.5:2;
  const rows=[];
  rows.push(row('Access width','Rule 28(1), Table 7','Project/table dependent',f(n('access'))+' m',true,true));
  if(o==='F'){ rows.push(row('Commercial access width','Rule 28(1), Table 8',f(d.access)+' m minimum',f(n('access'))+' m',n('access')>=d.access)); rows.push(row('Commercial room height','Rule 33(1)',f(d.roomHeight)+' m minimum',f(n('roomHeight'))+' m',n('roomHeight')>=d.roomHeight)); rows.push(row('Exit width','Rule 37(2), Table 16',f(d.exitWidth)+' m minimum',f(n('exitWidth'))+' m',n('exitWidth')>=d.exitWidth)); rows.push(row('Maximum travel distance','Rule 36(2)',d.travel+' m maximum',f(n('travel'))+' m',n('travel')<=d.travel)); rows.push(row('DA ramp slope','Rule 42(2)','Maximum 0.08 (1:12.5)','Defined in plan / check project',true,true)); }
- rows.push(row('Coverage','Rule 27(1)',f(p.coverage)+' % or less',f(cov)+' %',cov<=p.coverage));
- rows.push(row('FSI','Rule 27',f(p.fsi)+' or less',f(fsi),fsi<=p.fsi));
- rows.push(row('Front yard','Rule 26(4), Table 4 / 4A',f(p.front[0])+' m min; '+f(p.front[1])+' m mean',f(n('frontmin'))+' / '+f(n('frontmean'))+' m',n('frontmin')>=p.front[0]&&n('frontmean')>=p.front[1]));
- rows.push(row('Rear yard','Rule 26(4), Table 4 / 4A',f(p.rear[0])+' m min; '+f(p.rear[1])+' m mean',f(n('rearmin'))+' / '+f(n('rearmean'))+' m',n('rearmin')>=p.rear[0]&&n('rearmean')>=p.rear[1]));
- rows.push(row('Side yard 1','Rule 26(4), Table 4',f(p.side[0])+' m min; '+f(p.side[1])+' m mean',f(n('s1min'))+' / '+f(n('s1mean'))+' m',n('s1min')>=p.side[0]&&n('s1mean')>=p.side[1]));
- rows.push(row('Side yard 2','Rule 26(4), Table 4',f(p.side[0])+' m min; '+f(p.side[1])+' m mean',f(n('s2min'))+' / '+f(n('s2mean'))+' m',n('s2min')>=p.side[0]&&n('s2mean')>=p.side[1]));
+ rows.push(row('Coverage','Rule 27(1)',f(d.coverage)+' % or less',f(cov)+' %',cov<=d.coverage));
+ rows.push(row('FSI','Rule 27',f(d.fsi)+' or less',f(fsi),fsi<=d.fsi));
+ rows.push(row('Front yard','Rule 26(4), Table 4 / 4A',f(d.front[0])+' m min; '+f(d.front[1])+' m mean',f(n('frontmin'))+' / '+f(n('frontmean'))+' m',n('frontmin')>=d.front[0]&&n('frontmean')>=d.front[1]));
+ rows.push(row('Rear yard','Rule 26(4), Table 4 / 4A',f(d.rear[0])+' m min; '+f(d.rear[1])+' m mean',f(n('rearmin'))+' / '+f(n('rearmean'))+' m',n('rearmin')>=d.rear[0]&&n('rearmean')>=d.rear[1]));
+ rows.push(row('Side yard 1','Rule 26(4), Table 4',f(d.side[0])+' m min; '+f(d.side[1])+' m mean',f(n('s1min'))+' / '+f(n('s1mean'))+' m',n('s1min')>=d.side[0]&&n('s1mean')>=d.side[1]));
+ rows.push(row('Side yard 2','Rule 26(4), Table 4',f(d.side[0])+' m min; '+f(d.side[1])+' m mean',f(n('s2min'))+' / '+f(n('s2mean'))+' m',n('s2min')>=d.side[0]&&n('s2mean')>=d.side[1]));
  rows.push(row('Distance to road','Rule 23(2)',f(roadReq)+' m minimum',f(n('roadDist'))+' m',n('roadDist')>=roadReq));
  rows.push(row('Shortest plot-boundary distance','Rule 26(4) Proviso 3','1.00 m minimum',f(n('shortest'))+' m',n('shortest')>=1));
  rows.push(row('Shades / overhangs','Rule 26(9)','Inside plot boundary',$('shade').value==='yes'?'Inside':'Not confirmed',$('shade').value==='yes'));
@@ -214,10 +215,15 @@ $('check').addEventListener('click',()=>{
  rows.push(row('Waste to existing well','Rule 75(2)(iv)','7.50 m minimum',f(n('wasteWell'))+' m',n('wasteWell')>=7.5,true));
  rows.push(row('Waste to plot boundary','Rule 79(4)','0.30 m minimum',f(n('wastePlot'))+' m',n('wastePlot')>=.3));
  $('report').innerHTML=rows.join('');
- const hard=[cov<=p.coverage,fsi<=p.fsi,n('frontmin')>=p.front[0]&&n('frontmean')>=p.front[1],n('rearmin')>=p.rear[0]&&n('rearmean')>=p.rear[1],n('s1min')>=p.side[0]&&n('s1mean')>=p.side[1],n('s2min')>=p.side[0]&&n('s2mean')>=p.side[1],n('roadDist')>=roadReq,n('shortest')>=1,$('shade').value==='yes',n('unpaved')>=unpReq,$('vent').value==='yes',$('rwh').value==='yes',$('wasteSeg').value==='yes'];
+ const hard=[cov<=d.coverage,fsi<=d.fsi,n('frontmin')>=d.front[0]&&n('frontmean')>=d.front[1],n('rearmin')>=d.rear[0]&&n('rearmean')>=d.rear[1],n('s1min')>=d.side[0]&&n('s1mean')>=d.side[1],n('s2min')>=d.side[0]&&n('s2mean')>=d.side[1],n('roadDist')>=roadReq,n('shortest')>=1,$('shade').value==='yes',n('unpaved')>=unpReq,$('vent').value==='yes',$('rwh').value==='yes',$('wasteSeg').value==='yes'];
  const pass=hard.every(Boolean);
  $('summary').innerHTML=`<div class="metric"><small>Profile</small><strong>${p.name}</strong></div><div class="metric"><small>Coverage</small><strong>${f(cov)}%</strong></div><div class="metric"><small>FSI</small><strong>${f(fsi)}</strong></div><div class="metric"><small>Unpaved required</small><strong>${f(unpReq)} m²</strong></div>`;
  $('overall').innerHTML=pass?'<b class="ok">PRE-SCRUTINY PASS</b> — Automatically evaluated checks pass. Items marked VERIFY are informational/project-specific and still require confirmation.':'<b class="bad">CHECK REQUIRED</b> — One or more automatically evaluated checks failed. Review the red rows before submission.';
+ $('report').scrollIntoView({behavior:'smooth',block:'start'});
+ } catch(err) {
+   console.error(err);
+   $('overall').innerHTML='<b class="bad">Calculator error:</b> '+(err.message||err);
+ }
 });
 </script>
 </body></html>
