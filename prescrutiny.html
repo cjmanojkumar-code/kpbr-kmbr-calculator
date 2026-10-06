@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>KPBR KMBR K-SMART Pre-Scrutiny Calculator V2</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#f3f6f8;color:#17212b}
+.wrap{max-width:1200px;margin:auto;padding:18px}.hero{background:#17324d;color:#fff;padding:22px;border-radius:14px}
+h1{margin:0 0 6px;font-size:25px}.hero p{margin:0;opacity:.9;font-size:13px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}.card{background:#fff;border:1px solid #d7e0e7;border-radius:12px;padding:16px}.full{grid-column:1/-1}
+h2{font-size:17px;margin:0 0 12px}label{display:block;font-size:12px;font-weight:700;margin:9px 0 5px}
+input,select{width:100%;padding:10px;border:1px solid #b9c5ce;border-radius:7px;font-size:14px;background:#fff}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.three{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+button{padding:11px 16px;border:0;border-radius:8px;font-weight:700;cursor:pointer;background:#1769aa;color:white;margin-right:8px;margin-top:10px}.gray{background:#697680}
+.metricgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}.metric{border:1px solid #d8e0e6;border-radius:9px;padding:11px;background:#fafcfd}.metric small{color:#5b6871}.metric strong{display:block;font-size:19px;margin-top:4px}
+.ok{color:#167044}.bad{color:#b42318}.warn{color:#8a5a00}.note{font-size:12px;color:#596771;line-height:1.5}
+table{width:100%;border-collapse:collapse;margin-top:8px}th,td{border-bottom:1px solid #e2e7eb;padding:8px;text-align:left;font-size:13px;vertical-align:top}th{background:#f1f4f6}
+.rule{padding:10px;background:#eef5fa;border-left:3px solid #1769aa;font-size:12px;line-height:1.5;margin-top:10px}.passrow{background:#f0faf4}.failrow{background:#fff2f2}.verifyrow{background:#fff9eb}
+@media(max-width:800px){.grid,.metricgrid{grid-template-columns:1fr}.row,.three{grid-template-columns:1fr}.wrap{padding:10px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="hero">
+<h1>KPBR / KMBR — K-SMART Style Pre-Scrutiny Calculator V2</h1>
+<p>Verified A1 profiles from Government K-SMART scrutiny reports • Municipality + Panchayat Category I + Category II</p>
+</header>
+
+<div class="grid">
+<section class="card">
+<h2>1. Rule profile</h2>
+<label>Local Body / Rule Profile</label>
+<select id="profile">
+<option value="mun">Municipality — KMBR</option>
+<option value="p1">Grama Panchayat — Category I</option>
+<option value="p2">Grama Panchayat — Category II</option>
+</select>
+<label>Occupancy</label>
+<select id="occ">
+<option value="A1">A1 — Single family dwelling</option>
+<option value="F">F — Commercial</option>
+</select>
+<div class="rule" id="profileInfo"></div><div class="rule" id="occInfo"></div>
+</section>
+
+<section class="card">
+<h2>2. Plot & building</h2>
+<label>Plot area (m²)</label><input id="plot" type="number" min="0" step=".01">
+<label>Access width provided (m)</label><input id="access" type="number" min="0" step=".01">
+<label>Building height (m)</label><input id="height" type="number" min="0" step=".01">
+<label>Total covered area (m²)</label><input id="covered" type="number" min="0" step=".01">
+<label>Total Floor Area / FSI area (m²)</label><input id="tfa" type="number" min="0" step=".01">
+<label>Room height provided (m)</label><input id="roomHeight" type="number" min="0" step=".01">
+<label>Exit width provided (m)</label><input id="exitWidth" type="number" min="0" step=".01">
+<label>Maximum travel distance provided (m)</label><input id="travel" type="number" min="0" step=".01">
+</section>
+
+<section class="card">
+<h2>3. Yard dimensions</h2>
+<div class="row"><div><label>Front minimum (m)</label><input id="frontmin" type="number" min="0" step=".01"></div><div><label>Front mean (m)</label><input id="frontmean" type="number" min="0" step=".01"></div></div>
+<div class="row"><div><label>Rear minimum (m)</label><input id="rearmin" type="number" min="0" step=".01"></div><div><label>Rear mean (m)</label><input id="rearmean" type="number" min="0" step=".01"></div></div>
+<div class="row"><div><label>Side 1 minimum (m)</label><input id="s1min" type="number" min="0" step=".01"></div><div><label>Side 1 mean (m)</label><input id="s1mean" type="number" min="0" step=".01"></div></div>
+<div class="row"><div><label>Side 2 minimum (m)</label><input id="s2min" type="number" min="0" step=".01"></div><div><label>Side 2 mean (m)</label><input id="s2mean" type="number" min="0" step=".01"></div></div>
+</section>
+
+<section class="card">
+<h2>4. Road & boundary checks</h2>
+<label>Road type</label><select id="roadType"><option value="notified">Notified road</option><option value="unnotified">Un-notified road</option><option value="lane">Lane road</option></select>
+<label>Building to road distance (m)</label><input id="roadDist" type="number" min="0" step=".01">
+<label>Shortest building footprint to plot boundary (m)</label><input id="shortest" type="number" min="0" step=".01">
+<label>Shades / overhangs inside plot boundary?</label><select id="shade"><option value="yes">Yes</option><option value="no">No</option></select>
+</section>
+
+<section class="card">
+<h2>5. Environmental / services</h2>
+<label>Unpaved/percolation area provided (m²)</label><input id="unpaved" type="number" min="0" step=".01">
+<label>Ground-water recharge system</label><select id="rwh"><option value="yes">Defined / provided</option><option value="no">Not provided</option></select>
+<label>Light & ventilation</label><select id="vent"><option value="yes">Adequate</option><option value="no">Needs review</option></select>
+<label>Security zone</label><select id="security"><option value="no">No / not declared</option><option value="yes">Yes</option></select>
+</section>
+
+<section class="card">
+<h2>6. Septic / waste distances</h2>
+<label>Septic tank to existing well (m)</label><input id="septicWell" type="number" min="0" step=".01">
+<label>Septic tank to plot boundary (m)</label><input id="septicPlot" type="number" min="0" step=".01">
+<label>Waste disposal to existing well (m)</label><input id="wasteWell" type="number" min="0" step=".01">
+<label>Waste disposal to plot boundary (m)</label><input id="wastePlot" type="number" min="0" step=".01">
+<label>Waste segregation provided?</label><select id="wasteSeg"><option value="yes">Defined in plan</option><option value="no">Not defined</option></select>
+</section>
+
+<section class="card full">
+<h2>7. Automatically loaded rule requirements</h2>
+<div class="metricgrid">
+<div class="metric"><small>Permissible coverage</small><strong id="covReq">—</strong></div>
+<div class="metric"><small>Basic FSI / scrutiny limit</small><strong id="fsiReq">—</strong></div>
+<div class="metric"><small>Front yard min / mean</small><strong id="frontReq">—</strong></div>
+<div class="metric"><small>Rear yard min / mean</small><strong id="rearReq">—</strong></div>
+<div class="metric"><small>Side yards min / mean</small><strong id="sideReq">—</strong></div>
+<div class="metric"><small>Shortest boundary distance</small><strong id="shortReq">1.00 m</strong></div>
+<div class="metric"><small>Notified road distance</small><strong>3.00 m</strong></div>
+<div class="metric"><small>Un-notified road distance</small><strong>2.00 m</strong></div><div class="metric"><small>Commercial access</small><strong id="accessReq">—</strong></div><div class="metric"><small>Commercial room height</small><strong id="roomReq">—</strong></div>
+</div>
+<div class="rule" id="sourceInfo"></div>
+</section>
+
+<section class="card full">
+<h2>8. Benchmark projects from your scrutiny reports</h2>
+<select id="benchmark">
+<option value="">Select a benchmark...</option>
+<option value="mun345">Municipality — 345 m² plot</option>
+<option value="mun403">Municipality — 403 m² plot</option>
+<option value="p1_637">Panchayat Category I — 637 m² plot</option>
+<option value="p2_212">Panchayat Category II — A1 — 212 m² plot</option><option value="p2F_962">Panchayat Category II — F Commercial — 962 m² plot</option>
+</select>
+<button type="button" id="loadBenchmark">Load benchmark</button>
+<div class="note">These presets are extracted from the accepted Government K-SMART scrutiny reports supplied for this project. They are test cases, not substitutes for a project-specific scrutiny.</div>
+</section>
+
+<section class="card full">
+<button type="button" id="check">Run Pre-Scrutiny</button>
+<button type="button" id="reset" class="gray">Reset</button>
+</section>
+
+<section class="card full">
+<h2>9. Result</h2>
+<div class="metricgrid" id="summary"></div>
+<table><thead><tr><th>Check</th><th>Rule basis</th><th>Required</th><th>Provided</th><th>Status</th></tr></thead><tbody id="report"></tbody></table>
+<div id="overall" class="rule">Enter values and run the pre-scrutiny.</div>
+</section>
+
+<section class="card full">
+<h2>Rule/source notes</h2>
+<div class="rule">
+<strong>Municipality benchmark:</strong> the supplied KMBR scrutiny reports for Kottayam Municipality show A1 coverage “less than 65.00” and FSI “less than 4.00” with additional-fee wording under Rule 27. One report is a 345 m² plot and the other a 403 m² plot. <br>
+<strong>Panchayat Category I benchmark:</strong> the supplied Puthuppally Grama Panchayat report shows Category 1, A1 coverage less than 65.00 and FSI less than 4.00 with additional-fee wording. It also shows height up to 38.20 m under Rule 24(1A). <br>
+<strong>Panchayat Category II benchmark:</strong> the earlier accepted Kumarakom scrutiny benchmark shows the A1 Category II case used for the previous version. <br><strong>F — Commercial benchmark:</strong> the newly supplied Kangazha Category II report is an accepted 57.70 m² built-up / 49.69 m² floor-area commercial building on a 962 m² plot. It records 60% coverage, FSI 3.50, access width 1.20 m, front 1.8/3.0 m, rear 1.0/1.5 m, sides 1.0/1.0 m, room height 3.0 m, exit width 1.2 m, maximum travel distance 30 m and DA ramp slope 0.08. <br><br>
+Setback values shown here are the A1 values observed in the supplied reports: front (1.8, 3), rear (1, 1.5), side (1,1), with some reports also showing Table 4A alongside Table 4. Project-specific provisos can change the applicable requirement, so the calculator flags these as “report-profile” values rather than claiming universal applicability.
+</div>
+</section>
+</div>
+
+<script>
+const $=id=>document.getElementById(id), n=id=>Math.max(0,parseFloat($(id).value)||0), f=x=>Number.isFinite(x)?x.toFixed(2):'—';
+
+const profiles={
+ mun:{name:'KMBR Municipality',A1:{coverage:65,fsi:4,front:[1.8,3],rear:[1,1.5],side:[1,1],height:'No limit',src:'Kottayam Municipality accepted A1 scrutiny reports (345 m² and 403 m² plots).'},F:null},
+ p1:{name:'KPBR Panchayat Category I',A1:{coverage:65,fsi:4,front:[1.8,3],rear:[1,1.5],side:[1,1],height:'Up to 38.20 m in supplied A1 report',src:'Puthuppally Category I accepted A1 scrutiny report, 637 m² plot.'},F:null},
+ p2:{name:'KPBR Panchayat Category II',A1:{coverage:60,fsi:2.5,front:[1.8,3],rear:[1,1.5],side:[0.9,0.9],height:'Project-specific',src:'Earlier accepted Kumarakom Category II A1 benchmark.'},F:{coverage:60,fsi:3.5,front:[1.8,3],rear:[1,1.5],side:[1,1],height:'Up to 22.00 m in supplied report',access:1.2,roomHeight:3,exitWidth:1.2,travel:30,daSlope:0.08,src:'Kangazha Category II accepted F–Commercial scrutiny report dated 28/06/2025.'}}
+};
+function loadProfile(){
+ const p=profiles[$('profile').value],o=$('occ').value, d=p[o];
+ if(!d){
+   $('covReq').textContent='—';$('fsiReq').textContent='—';$('frontReq').textContent='—';$('rearReq').textContent='—';$('sideReq').textContent='—';
+   $('accessReq').textContent='VERIFY';$('roomReq').textContent='VERIFY';
+   $('profileInfo').innerHTML='<b>'+p.name+'</b>';
+   $('occInfo').innerHTML='<b>F — Commercial:</b> No accepted report supplied yet for this local-body profile. The commercial values in this calculator are currently source-supported only for <b>Panchayat Category II</b>.';
+   $('sourceInfo').innerHTML='<b>Commercial source status:</b> The supplied Kangazha Category II report supports F–Commercial values. Municipality and Category I commercial values are deliberately not inferred from that report.';
+   return;
+ }
+ $('covReq').textContent=f(d.coverage)+' %';$('fsiReq').textContent=f(d.fsi);
+ $('frontReq').textContent=f(d.front[0])+' / '+f(d.front[1])+' m';
+ $('rearReq').textContent=f(d.rear[0])+' / '+f(d.rear[1])+' m';
+ $('sideReq').textContent=f(d.side[0])+' / '+f(d.side[1])+' m';
+ $('accessReq').textContent=d.access?f(d.access)+' m':'—';$('roomReq').textContent=d.roomHeight?f(d.roomHeight)+' m':'—';
+ $('profileInfo').innerHTML='<b>'+p.name+'</b><br>Coverage: '+f(d.coverage)+'% • FSI: '+f(d.fsi)+' • Height: '+d.height;
+ $('occInfo').innerHTML=o==='F'?'<b>F — Commercial:</b> Coverage 60%; FSI 3.50; front 1.8/3.0 m; rear 1.0/1.5 m; sides 1.0/1.0 m; access 1.2 m; room height 3.0 m; exit width 1.2 m; max travel distance 30 m; DA ramp slope 1:12.5 (0.08).<br><span class="note">These commercial values are directly benchmarked to the supplied Kangazha Category 2 accepted report.</span>':'<b>A1 — Single family dwelling:</b> '+d.src;
+ $('sourceInfo').innerHTML='<b>Source profile:</b> '+d.src+'<br><b>Important:</b> values are report-benchmarked. Do not extrapolate commercial requirements from Category II to Municipality or Category I until a corresponding accepted report/rule-table verification is added.';
+}
+$('profile').addEventListener('change',loadProfile);$('occ').addEventListener('change',loadProfile);loadProfile();
+
+$('profile').addEventListener('change',loadProfile);loadProfile();
+
+const benchmarks={
+mun345:{profile:'mun',plot:345,access:3.6,height:6.97,covered:129.66,tfa:232.95,front:[6.84,9.77],rear:[2.78,4.05],side1:[1.5,2.87],side2:[1.1,2.54],roadType:'unnotified',roadDist:6.84,shortest:1.10,unpaved:107.67,rwh:'yes',vent:'yes',security:'no',septicWell:7.73,septicPlot:3.37,wasteWell:8.76,wastePlot:3.27,wasteSeg:'yes'},
+mun403:{profile:'mun',plot:403,access:0,height:7.20,covered:112.29,tfa:133.41,front:[7.68,8.53],rear:[2.33,6],side1:[1.12,2.14],side2:[1.1,1.35],roadType:'notified',roadDist:7.04,shortest:1.09,unpaved:145.36,rwh:'yes',vent:'yes',security:'no',septicWell:17.54,septicPlot:1.13,wasteWell:9.22,wastePlot:1.26,wasteSeg:'yes'},
+p1_637:{profile:'p1',plot:637,access:8,height:6.45,covered:112.89,tfa:118.85,front:[11.15,12.61],rear:[3,4.09],side1:[10.33,10.71],side2:[5.39,6.35],roadType:'notified',roadDist:11.10,shortest:1.0,unpaved:262.06,rwh:'yes',vent:'yes',security:'no',septicWell:23.05,septicPlot:3.83,wasteWell:11.22,wastePlot:3.32,wasteSeg:'yes'},
+p2_212:{profile:'p2',occ:'A1',plot:212,access:3.6,height:6.90,covered:60.30,tfa:82.27,front:[6.84,9.77],rear:[2.78,4.05],side1:[2.16,2.38],side2:[1.53,1.81],roadType:'unnotified',roadDist:6.84,shortest:1.10,unpaved:75.85,rwh:'yes',vent:'yes',security:'no',septicWell:0,septicPlot:0,wasteWell:0,wastePlot:1.39,wasteSeg:'yes'},
+p2F_962:{profile:'p2',occ:'F',plot:962,access:8,height:4.95,covered:57.70,tfa:49.69,front:[3,3.41],rear:[64.37,64.65],side1:[1.96,2.10],side2:[1.50,1.50],roadType:'notified',roadDist:3.00,shortest:1.00,unpaved:452.15,rwh:'yes',vent:'yes',security:'no',septicWell:0,septicPlot:0,wasteWell:0,wastePlot:3.47,wasteSeg:'yes',exitWidth:1.83,travel:4.73,daRamp:'defined',roomHeight:3.00}
+};
+function set(id,v){$(id).value=v}
+$('loadBenchmark').addEventListener('click',()=>{
+ const b=benchmarks[$('benchmark').value];if(!b)return;
+ set('profile',b.profile);set('occ',b.occ||'A1');loadProfile();set('plot',b.plot);set('access',b.access);set('height',b.height);set('covered',b.covered);set('tfa',b.tfa);
+ set('roomHeight',b.roomHeight||'');set('exitWidth',b.exitWidth||'');set('travel',b.travel||'');set('frontmin',b.front[0]);set('frontmean',b.front[1]);set('rearmin',b.rear[0]);set('rearmean',b.rear[1]);set('s1min',b.side1[0]);set('s1mean',b.side1[1]);set('s2min',b.side2[0]);set('s2mean',b.side2[1]);
+ set('roadType',b.roadType);set('roadDist',b.roadDist);set('shortest',b.shortest);set('shade','yes');set('unpaved',b.unpaved);set('rwh',b.rwh);set('vent',b.vent);set('security',b.security);
+ set('septicWell',b.septicWell);set('septicPlot',b.septicPlot);set('wasteWell',b.wasteWell);set('wastePlot',b.wastePlot);set('wasteSeg',b.wasteSeg);
+});
+$('reset').addEventListener('click',()=>location.reload());
+function row(name,rule,req,prov,ok,verify=false){let cls=verify?'verifyrow':ok?'passrow':'failrow';let st=verify?'<span class="warn">VERIFY</span>':ok?'<span class="ok">ACCEPTED</span>':'<span class="bad">CHECK</span>';return `<tr class="${cls}"><td>${name}</td><td>${rule}</td><td>${req}</td><td>${prov}</td><td>${st}</td></tr>`}
+$('check').addEventListener('click',()=>{
+ try {
+ const p=profiles[$('profile').value],o=$('occ').value,d=p[o],plot=n('plot'),covered=n('covered'),tfa=n('tfa');if(!d){$('overall').innerHTML='<b class="warn">Commercial rule profile not yet source-verified for this local body. Use the Category II commercial profile or supply an accepted Municipality/Category I commercial scrutiny report.</b>';return} if(plot<=0){$('overall').innerHTML='<b class="bad">Enter a valid plot area.</b>';return}
+ const cov=covered/plot*100,fsi=tfa/plot,unpReq=(plot-covered)*.5;
+ let roadReq=$('roadType').value==='notified'?3:$('roadType').value==='lane'?1.5:2;
+ const rows=[];
+ rows.push(row('Access width','Rule 28(1), Table 7','Project/table dependent',f(n('access'))+' m',true,true));
+ if(o==='F'){ rows.push(row('Commercial access width','Rule 28(1), Table 8',f(d.access)+' m minimum',f(n('access'))+' m',n('access')>=d.access)); rows.push(row('Commercial room height','Rule 33(1)',f(d.roomHeight)+' m minimum',f(n('roomHeight'))+' m',n('roomHeight')>=d.roomHeight)); rows.push(row('Exit width','Rule 37(2), Table 16',f(d.exitWidth)+' m minimum',f(n('exitWidth'))+' m',n('exitWidth')>=d.exitWidth)); rows.push(row('Maximum travel distance','Rule 36(2)',d.travel+' m maximum',f(n('travel'))+' m',n('travel')<=d.travel)); rows.push(row('DA ramp slope','Rule 42(2)','Maximum 0.08 (1:12.5)','Defined in plan / check project',true,true)); }
+ rows.push(row('Coverage','Rule 27(1)',f(d.coverage)+' % or less',f(cov)+' %',cov<=d.coverage));
+ rows.push(row('FSI','Rule 27',f(d.fsi)+' or less',f(fsi),fsi<=d.fsi));
+ rows.push(row('Front yard','Rule 26(4), Table 4 / 4A',f(d.front[0])+' m min; '+f(d.front[1])+' m mean',f(n('frontmin'))+' / '+f(n('frontmean'))+' m',n('frontmin')>=d.front[0]&&n('frontmean')>=d.front[1]));
+ rows.push(row('Rear yard','Rule 26(4), Table 4 / 4A',f(d.rear[0])+' m min; '+f(d.rear[1])+' m mean',f(n('rearmin'))+' / '+f(n('rearmean'))+' m',n('rearmin')>=d.rear[0]&&n('rearmean')>=d.rear[1]));
+ rows.push(row('Side yard 1','Rule 26(4), Table 4',f(d.side[0])+' m min; '+f(d.side[1])+' m mean',f(n('s1min'))+' / '+f(n('s1mean'))+' m',n('s1min')>=d.side[0]&&n('s1mean')>=d.side[1]));
+ rows.push(row('Side yard 2','Rule 26(4), Table 4',f(d.side[0])+' m min; '+f(d.side[1])+' m mean',f(n('s2min'))+' / '+f(n('s2mean'))+' m',n('s2min')>=d.side[0]&&n('s2mean')>=d.side[1]));
+ rows.push(row('Distance to road','Rule 23(2)',f(roadReq)+' m minimum',f(n('roadDist'))+' m',n('roadDist')>=roadReq));
+ rows.push(row('Shortest plot-boundary distance','Rule 26(4) Proviso 3','1.00 m minimum',f(n('shortest'))+' m',n('shortest')>=1));
+ rows.push(row('Shades / overhangs','Rule 26(9)','Inside plot boundary',$('shade').value==='yes'?'Inside':'Not confirmed',$('shade').value==='yes'));
+ rows.push(row('Unpaved area','Rule 26(8)',f(unpReq)+' m² minimum',f(n('unpaved'))+' m²',n('unpaved')>=unpReq));
+ rows.push(row('Light & ventilation','Rule 41','Adequate',$('vent').value==='yes'?'Yes':'No',$('vent').value==='yes'));
+ rows.push(row('Ground-water recharge','Rule 76(1)','Defined / provided',$('rwh').value==='yes'?'Yes':'No',$('rwh').value==='yes'));
+ rows.push(row('Security zone','Rule 24(3)','No / verify',$('security').value==='no'?'No':'Yes',$('security').value==='no',true));
+ rows.push(row('Septic tank to existing well','Rule 75(2)(ii)','7.50 m minimum',f(n('septicWell'))+' m',n('septicWell')>=7.5,true));
+ rows.push(row('Septic tank to plot boundary','Rule 79(4)','0.30 m minimum',f(n('septicPlot'))+' m',n('septicPlot')>=.3,true));
+ rows.push(row('Waste segregation','Rule 79(1)','Mandatory',$('wasteSeg').value==='yes'?'Defined':'Not defined',$('wasteSeg').value==='yes'));
+ rows.push(row('Waste to existing well','Rule 75(2)(iv)','7.50 m minimum',f(n('wasteWell'))+' m',n('wasteWell')>=7.5,true));
+ rows.push(row('Waste to plot boundary','Rule 79(4)','0.30 m minimum',f(n('wastePlot'))+' m',n('wastePlot')>=.3));
+ $('report').innerHTML=rows.join('');
+ const hard=[cov<=d.coverage,fsi<=d.fsi,n('frontmin')>=d.front[0]&&n('frontmean')>=d.front[1],n('rearmin')>=d.rear[0]&&n('rearmean')>=d.rear[1],n('s1min')>=d.side[0]&&n('s1mean')>=d.side[1],n('s2min')>=d.side[0]&&n('s2mean')>=d.side[1],n('roadDist')>=roadReq,n('shortest')>=1,$('shade').value==='yes',n('unpaved')>=unpReq,$('vent').value==='yes',$('rwh').value==='yes',$('wasteSeg').value==='yes'];
+ const pass=hard.every(Boolean);
+ $('summary').innerHTML=`<div class="metric"><small>Profile</small><strong>${p.name}</strong></div><div class="metric"><small>Coverage</small><strong>${f(cov)}%</strong></div><div class="metric"><small>FSI</small><strong>${f(fsi)}</strong></div><div class="metric"><small>Unpaved required</small><strong>${f(unpReq)} m²</strong></div>`;
+ $('overall').innerHTML=pass?'<b class="ok">PRE-SCRUTINY PASS</b> — Automatically evaluated checks pass. Items marked VERIFY are informational/project-specific and still require confirmation.':'<b class="bad">CHECK REQUIRED</b> — One or more automatically evaluated checks failed. Review the red rows before submission.';
+ $('report').scrollIntoView({behavior:'smooth',block:'start'});
+ } catch(err) {
+   console.error(err);
+   $('overall').innerHTML='<b class="bad">Calculator error:</b> '+(err.message||err);
+ }
+});
+</script>
+</body></html>
